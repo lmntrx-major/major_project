@@ -41,6 +41,7 @@ function Predict() {
 
       <div style={styles.predictSection}>
         <button onClick={handlePredict} style={styles.predictButton}>Predict</button>
+        <br />
         <span style={styles.result}>{result}</span>
       </div>
     </div>
