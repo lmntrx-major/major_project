@@ -3,7 +3,9 @@ import tensorflow as tf
 
 app = FastAPI()
 
-model = tf.keras.models.load_model("D:\\major_project_1\\models\\mnv3large.keras")
+print(tf.__version__)
+
+model = tf.keras.models.load_model("D:\\major_project_1\\models\\linux.keras")
 # async def preprocess_image(image):
 #     image = tf.image.resize(image, [224, 224], method=tf.image.ResizeMethod.BILINEAR, antialias=True)
 #     return image
