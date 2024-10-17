@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 
 function Predict() {
   const [image, setImage] = useState(null);
+  const [img, setImg] = useState(null);
   const [result, setResult] = useState('');
 
   // Handle image upload
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
+    setImg(file);
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -20,14 +22,27 @@ function Predict() {
   const handleClear = () => {
     setImage(null);
     setResult('');
+    setImg(null);
   };
 
   // Handle prediction (replace with actual prediction logic)
-    const handlePredict = () => {
-    // This is a placeholder for the actual prediction logic.
-    // You can replace it with an API call to predict the image content.
-    setResult('Prediction result goes here');
-  };
+  async function handlePredict() {
+    const api_url = "http://localhost:8000/predict-image";
+    const formData = new FormData();
+    formData.append("file", img);
+
+    try {
+      const response = await fetch(api_url, {
+        method: 'POST',
+        body: formData,
+      });
+      const result = await response.json();
+      setResult(result.Prediction);
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Failed!");
+    }
+  }
 
   return (
     <div style={styles.container}>

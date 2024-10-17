@@ -1,5 +1,6 @@
 import uvicorn
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import tensorflow as tf
 import os
 
@@ -13,21 +14,33 @@ model_path: str = os.path.join(parent_dir_path, model_rel_path)
 
 # Loading model
 model = tf.keras.models.load_model(model_path)
+labels = ['Anwar Ratool', 'Chaunsa (Black)', 'Chaunsa (Summer Bahisht)', 'Chaunsa (White)', 'Dosehri', 'Fajri', 'Langra', 'Sindhri']
 # model.summary()
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins = ["*"],
+    allow_credentials = True,
+    allow_methods = ["*"],
+    allow_headers = ["*"],
+)
 
 @app.post("/predict-image")
 async def predict(file: UploadFile = File(...)):
     image = await file.read()
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.resize(image, [224, 224], method=tf.image.ResizeMethod.BILINEAR, antialias=True)
-    image = tf.image.convert_image_dtype(image, tf.float32)
+    image = tf.convert_to_tensor(image, dtype=tf.float32)
     image_batch = tf.expand_dims(image, 0)
 
-    result = tf.argmax(tf.nn.softmax(model.predict(image_batch)))
+    result = model.predict_on_batch(image_batch)
+    result = tf.argmax(result, axis=-1)
+    result = result.numpy()[0]
+    result = labels[result]
 
-    return {"Prediction": result.numpy().tolist()[0]}
+    return {"Prediction": result}
 
 
 if __name__ == "__main__":
